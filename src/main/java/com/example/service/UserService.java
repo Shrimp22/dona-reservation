@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dto.DetailResponse;
+import com.example.dto.UserDto;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.vertx.codegen.doc.Token;
@@ -12,25 +13,27 @@ import jakarta.ws.rs.core.Response;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @ApplicationScoped
 public class UserService implements PanacheRepository<User> {
-    public User create(User u) {
+    public Response create(User u) {
         User findUser = find("email", u.getEmail()).firstResult();
         if(findUser != null) {
-            return null;
+            return Response.status(403).entity(new DetailResponse("User already exist")).build();
         }
 
         String hashedPassword = BcryptUtil.bcryptHash(u.getPassword());
         u.setPassword(hashedPassword);
         persist(u);
-        return u;
+        return Response.ok(new UserDto(u)).build();
     }
 
-    public List<User> getAll() {
+    public Response getAll() {
         List<User> users = findAll().list();
-        return users;
+        List<UserDto> usersDto = users.stream().map(UserDto::new).collect(Collectors.toList());
+        return Response.ok(usersDto).build();
     }
 
     public Response login(User u) {

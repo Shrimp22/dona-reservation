@@ -1,6 +1,7 @@
 package com.example.resources;
 
 
+import com.example.dto.DetailResponse;
 import com.example.models.User;
 import com.example.service.UserService;
 import io.quarkus.security.Authenticated;
@@ -30,13 +31,13 @@ public class UserResource {
     @POST
     @PermitAll
     @Transactional
-    public User addUser(User u) {
+    public Response addUser(User u) {
         return userService.create(u);
     }
 
     @GET
     @RolesAllowed("Admin")
-    public List<User> getAllUsers() {
+    public Response getAllUsers() {
         return userService.getAll();
     }
 
@@ -56,9 +57,7 @@ public class UserResource {
         if(deletedUser != null) {
             return Response.ok(deletedUser).build();
         }
-        Map<String, String> response = new HashMap<>();
-        response.put("detail", "User not found");
-        return Response.status(404).entity(response).build();
+        return Response.status(404).entity(new DetailResponse("User not found")).build();
     }
 
     @RolesAllowed("Admin")
@@ -69,9 +68,7 @@ public class UserResource {
         if(findUser != null) {
             return Response.ok(findUser).build();
         }
-        Map<String, String> response = new HashMap<>();
-        response.put("detail", "User not found");
-        return Response.status(404).entity(response).build();
+        return Response.status(404).entity(new DetailResponse("User not found")).build();
     }
 
     @RolesAllowed("User")
@@ -82,9 +79,7 @@ public class UserResource {
         if(updateUser != null) {
             return Response.ok(updateUser).build();
         }
-        Map<String, String> response = new HashMap<>();
-        response.put("detail", "User not found");
-        return Response.status(404).entity(response).build();
+        return Response.status(404).entity(new DetailResponse("User not found")).build();
     }
 
 }
