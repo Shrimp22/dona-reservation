@@ -14,6 +14,8 @@ public class Reservation {
 
     private boolean approved = false;
 
+    private boolean termTaken = false;
+
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = Product.class)
     @JoinColumn(name="product_id", nullable = false)
     private Product product;
@@ -26,12 +28,13 @@ public class Reservation {
 
     public Reservation() {}
 
-    public Reservation(LocalDateTime startDate, LocalDateTime endDate, Product product, User user, boolean approved) {
+    public Reservation(LocalDateTime startDate, LocalDateTime endDate, Product product, User user, boolean approved, boolean termTaken) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.product = product;
         this.user = user;
         this.approved = approved;
+        this.termTaken = termTaken;
     }
 
     public Long getId() {
@@ -92,5 +95,13 @@ public class Reservation {
 
     public void deny() {
         this.approved = false;
+    }
+
+    public boolean getTerm() {
+        return termTaken;
+    }
+
+    public void setTerm(boolean termTaken) {
+        this.termTaken = termTaken;
     }
 }

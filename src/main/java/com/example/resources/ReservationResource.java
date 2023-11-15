@@ -2,7 +2,6 @@ package com.example.resources;
 
 import com.example.models.Reservation;
 import com.example.service.ReservationService;
-import jakarta.annotation.Resource;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -17,6 +16,7 @@ public class ReservationResource {
     @Inject
     ReservationService reservationService;
 
+    // TODO: Fix roles
     @RolesAllowed("User")
     @POST
     @Transactional

@@ -12,7 +12,9 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,9 +31,19 @@ public class ReservationService implements PanacheRepository<Reservation> {
     @Inject
     ProductService productService;
 
-    // check is term taken
+    // check is term taken and mark it with boolean
+
+    public List<Reservation> findByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return find("startDate between ?1 and ?2 or endDate between ?1 and ?2 or (startDate <= ?1 and endDate >= ?2)",
+                startDateTime, endDateTime)
+                .list();
+    }
+
     public Response create(Reservation r) {
-        // Find  active user and wanted product based on id
+        List<Reservation> reservationsInTerm = findByDateTimeRange(r.getStartDate(), r.getEndDate());
+        if(reservationsInTerm.size() > 0) {
+            return Response.status(403).entity(new DetailResponse("Term already taken")).build();
+        }
         String email = securityContext.getUserPrincipal().getName();
         User activeUser = userService.find("email", email).firstResult();
         r.setUser(activeUser);
@@ -41,7 +53,8 @@ public class ReservationService implements PanacheRepository<Reservation> {
         }
         r.setProduct(product);
         persist(r);
-        return Response.ok(r).build();
+        UserReservations res = new UserReservations(r);
+        return Response.ok(res).build();
     }
 
 
