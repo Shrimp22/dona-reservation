@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.dto.DetailResponse;
 import com.example.models.Product;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
@@ -29,32 +30,25 @@ public class ProductService implements PanacheRepository<Product> {
     public Response getById(Long id) {
         Product p = findById(id);
         if(p == null) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("detail", "product not found");
-            return Response.status(404).entity(resp).build();
+            return Response.status(404).entity(new DetailResponse("product not found")).build();
         }
         return Response.ok(p).build();
     }
 
     public Response delete(Long id) {
         Product dbProduct = findById(id);
-        Map<String, String> resp = new HashMap<>();
         if(dbProduct == null) {
-            resp.put("detail", "product not found");
-            return Response.status(404).entity(resp).build();
+            return Response.status(404).entity(new DetailResponse("Product not found")).build();
         }
         delete(dbProduct);
-        resp.put("detail", "Product is deleted");
-        return Response.ok(resp).build();
+        return Response.ok(new DetailResponse("Product is deleted")).build();
     }
 
     public Response update(Product p) {
         Product dbProduct = findById(p.getId());
-        Map<String, String> resp = new HashMap<>();
 
         if(dbProduct == null) {
-            resp.put("detail", "Not found");
-            return Response.status(404).entity(resp).build();
+            return Response.status(404).entity(new DetailResponse("Product not found")).build();
         }
 
         Field[] fields = Product.class.getDeclaredFields();
@@ -75,5 +69,4 @@ public class ProductService implements PanacheRepository<Product> {
         return Response.ok(dbProduct).build();
     }
 
-    // crud: update
 }
