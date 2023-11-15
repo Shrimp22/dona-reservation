@@ -35,7 +35,7 @@ public class UserResource {
     }
 
     @GET
-    @RolesAllowed("User")
+    @RolesAllowed("Admin")
     public List<User> getAllUsers() {
         return userService.getAll();
     }
@@ -49,7 +49,7 @@ public class UserResource {
 
 
     @DELETE
-    @RolesAllowed("User")
+    @RolesAllowed("Admin")
     @Transactional
     public Response deleteUser(User u) {
         User deletedUser = userService.delete(u.getId());
@@ -61,7 +61,7 @@ public class UserResource {
         return Response.status(404).entity(response).build();
     }
 
-    @RolesAllowed("User")
+    @RolesAllowed("Admin")
     @GET
     @Path("/{id:\\d+}")
     public Response getId(Long id) {
@@ -86,6 +86,5 @@ public class UserResource {
         response.put("detail", "User not found");
         return Response.status(404).entity(response).build();
     }
-
 
 }

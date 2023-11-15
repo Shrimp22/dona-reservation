@@ -40,7 +40,7 @@ public class UserService implements PanacheRepository<User> {
         }
         if(BcryptUtil.matches(u.getPassword(), dbUser.getPassword())) {
             try {
-                String token = TokenUtils.generateToken(u.getEmail());
+                String token = TokenUtils.generateToken(dbUser.getEmail(), dbUser.isAdmin());
                 return Response.ok(new DetailResponse("Bearer " + token)).build();
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -108,10 +108,10 @@ public class ReservationService implements PanacheRepository<Reservation> {
 
         }
 
+        dbRes.deny();
         persistAndFlush(dbRes);
 
         return Response.ok(new UserReservations(dbRes)).build();
     }
 
-    // TODO: Response for user and product endpoints
 }

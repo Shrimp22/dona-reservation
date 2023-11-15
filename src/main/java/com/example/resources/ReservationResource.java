@@ -2,6 +2,7 @@ package com.example.resources;
 
 import com.example.models.Reservation;
 import com.example.service.ReservationService;
+import jakarta.annotation.Resource;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -30,14 +31,15 @@ public class ReservationResource {
         return reservationService.delete(r.getId());
     }
 
-    @GET()
+    @RolesAllowed("User")
+    @GET
     @Path("/{id:\\d+}")
     public Response getById(Long id) {
         return reservationService.getById(id);
     }
 
 
-    @RolesAllowed("User")
+    @RolesAllowed("Admin")
     @GET
     @Path("/user/{id:\\d+}")
     public Response getFromUser(Long id) {

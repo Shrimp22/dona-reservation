@@ -12,7 +12,7 @@ import java.util.Base64;
 import java.util.HashSet;
 
 public class TokenUtils {
-    public static String generateToken(String username) throws Exception {
+    public static String generateToken(String username, boolean isAdmin) throws Exception {
         String privateKeyLocation = "/privatekey.pem";
         PrivateKey privateKey = readPrivateKey(privateKeyLocation);
 
@@ -21,10 +21,15 @@ public class TokenUtils {
 
         claimsBuilder.issuer("http://localhost:8080/api");
         claimsBuilder.subject(username);
-        //claimsBuilder.groups(new HashSet<>(Arrays.asList("User", "Admin")));
-        claimsBuilder.groups("User");
+
+        String group = "User";
+        if(isAdmin == true) {
+            group = "Admin";
+        }
+
+        claimsBuilder.groups(group);
         claimsBuilder.issuedAt(currentTimeInSecs);
-        claimsBuilder.expiresAt(currentTimeInSecs + 36000);
+        claimsBuilder.expiresAt(currentTimeInSecs + 3600);
         return claimsBuilder.jws().signatureKeyId(privateKeyLocation).sign(privateKey).trim();
     }
 

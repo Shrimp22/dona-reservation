@@ -21,6 +21,7 @@ import java.util.Map;
 @Path("/api/product/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed("Admin")
 public class ProductResource {
 
     @Inject
@@ -33,7 +34,6 @@ public class ProductResource {
     SecurityContext securityContext;
 
     @POST
-    @RolesAllowed("User")
     @Transactional
     public Response create(Product p) {
         Map<String, String> response = new HashMap<>();
@@ -48,13 +48,13 @@ public class ProductResource {
         return Response.ok(new ProductUserDto(product)).build();
     }
 
+
     @GET
     @Path("{id:\\d+}")
     public Response getById(Long id) {
         return productService.getById(id);
     }
 
-    @RolesAllowed("User")
     @DELETE
     @Transactional
     public Response delete(Product p) {
@@ -62,7 +62,6 @@ public class ProductResource {
     }
 
     @PUT
-    @RolesAllowed("User")
     @Transactional
     public Response update(Product p) {
         return productService.update(p);

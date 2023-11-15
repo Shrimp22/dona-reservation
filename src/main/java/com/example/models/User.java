@@ -17,6 +17,8 @@ public class User {
     private String email;
     private String password;
 
+    private boolean isAdmin = false;
+
     // created products
     @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Product> products = new HashSet<>();
@@ -76,12 +78,19 @@ public class User {
         return reservations;
     }
 
-    public User(String firstName, String lastName, String phone, String email, String password) {
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+    public User(String firstName, String lastName, String phone, String email, String password, boolean isAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.email = email;
         this.password = password;
+        this.isAdmin = isAdmin;
     }
 
     public User() {}
