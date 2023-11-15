@@ -1,11 +1,13 @@
 package com.example.service;
 
+import com.example.dto.DetailResponse;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.vertx.codegen.doc.Token;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.quarkus.elytron.security.common.BcryptUtil;
+import jakarta.ws.rs.core.Response;
 
 
 import java.lang.reflect.Field;
@@ -31,21 +33,21 @@ public class UserService implements PanacheRepository<User> {
         return users;
     }
 
-    public String login(User u) {
+    public Response login(User u) {
         User dbUser = find("email", u.getEmail()).firstResult();
         if(dbUser == null) {
-            return null;
+            return Response.status(404).entity(new DetailResponse("User not found")).build();
         }
         if(BcryptUtil.matches(u.getPassword(), dbUser.getPassword())) {
             try {
                 String token = TokenUtils.generateToken(u.getEmail());
-                return token;
+                return Response.ok(new DetailResponse("Bearer " + token)).build();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
+        return Response.status(401).entity(new DetailResponse("Wrong password")).build();
 
-        return null;
     }
 
     public User getUserByEmail(String email) {

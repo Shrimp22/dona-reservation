@@ -1,6 +1,5 @@
 package com.example.resources;
 
-
 import com.example.models.Reservation;
 import com.example.service.ReservationService;
 import jakarta.annotation.security.RolesAllowed;
@@ -14,7 +13,6 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ReservationResource {
-
     @Inject
     ReservationService reservationService;
 
@@ -44,5 +42,12 @@ public class ReservationResource {
     @Path("/user/{id:\\d+}")
     public Response getFromUser(Long id) {
         return reservationService.getReservationsFromUser(id);
+    }
+
+    @RolesAllowed("User")
+    @PUT
+    @Transactional
+    public Response update(Reservation r) {
+        return reservationService.update(r);
     }
 }

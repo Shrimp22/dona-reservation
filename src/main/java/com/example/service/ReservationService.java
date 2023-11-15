@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.dto.DetailResponse;
 import com.example.dto.UserReservations;
 import com.example.models.Product;
 import com.example.models.Reservation;
@@ -10,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -76,5 +78,40 @@ public class ReservationService implements PanacheRepository<Reservation> {
 
     }
 
-    // crud: update, get reservations based on product, get reservations based on author
+
+    public Response update(Reservation r) {
+        Reservation dbRes = findById(r.getId());
+        if(dbRes == null) {
+            return Response.status(404).entity(new DetailResponse("Reservation not found")).build();
+        }
+        Field[] fields = Reservation.class.getDeclaredFields();
+
+        for(Field field : fields) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(r);
+                if(value != null) {
+                    field.set(dbRes, value);
+                    String fieldName = field.getName();
+                    if(fieldName.equalsIgnoreCase("productId")) {
+                        Product dbProduct = productService.findById((Long) value);
+                        if(dbProduct == null) {
+                            return Response.status(404).entity(new DetailResponse("Product not found")).build();
+                        }
+                        dbRes.setProduct(dbProduct);
+                    }
+                }
+                field.setAccessible(false);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        persistAndFlush(dbRes);
+
+        return Response.ok(new UserReservations(dbRes)).build();
+    }
+
+    // TODO: Response for user and product endpoints
 }

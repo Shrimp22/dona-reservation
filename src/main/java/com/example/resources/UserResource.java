@@ -44,16 +44,7 @@ public class UserResource {
     @PermitAll
     @Path("/login")
     public Response loginUser(User u) {
-        // message for wrong password
-        String token = userService.login(u);
-        Map<String, String> response = new HashMap<>();
-        if(token != null) {
-            response.put("token", token);
-            Response res = Response.ok(response).build();
-            return res;
-        }
-        response.put("detail", "User not found");
-        return Response.status(404).entity(response).build();
+        return userService.login(u);
     }
 
 

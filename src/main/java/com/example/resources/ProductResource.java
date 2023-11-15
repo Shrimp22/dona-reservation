@@ -1,6 +1,7 @@
 package com.example.resources;
 
 
+import com.example.dto.ProductUserDto;
 import com.example.models.Product;
 import com.example.models.User;
 import com.example.service.ProductService;
@@ -43,7 +44,8 @@ public class ProductResource {
             response.put("detail", "Product already exist");
             return Response.status(400).entity(response).build();
         }
-        return Response.ok(product).build();
+
+        return Response.ok(new ProductUserDto(product)).build();
     }
 
     @GET
