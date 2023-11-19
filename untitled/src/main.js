@@ -15,11 +15,11 @@ import AboutUs from "@/views/AboutUs.vue";
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        { path: '/register', component: Register },
-        {path: '/login', component: Login},
-        { path: '/reservation', component: Reservation },
-        { path: '/', component: Home},
-        {path: '/aboutus', component: AboutUs}
+        { path: '/register', component: Register, name: "Register" },
+        {path: '/login', component: Login, name: "Login"},
+        { path: '/reservation', component: Reservation, name: "Reservation" },
+        { path: '/', component: Home, name: "Home"},
+        {path: '/aboutus', component: AboutUs, name: "AboutUs"}
     ]
 });
 

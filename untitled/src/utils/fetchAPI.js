@@ -15,7 +15,6 @@ export async function fetchAPI(endpoint, method, data = null) {
     }
 
     let token = await userStore.getters.getToken;
-    console.log("Token " + token);
     if(token !== null) {
         options["headers"] = {
             ...options["headers"],

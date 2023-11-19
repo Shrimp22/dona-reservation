@@ -1,6 +1,5 @@
 <script>
 import {fetchAPI} from "@/utils/fetchAPI";
-import {userStore} from "@/utils/store";
 
 export default {
   data() {
@@ -17,6 +16,7 @@ export default {
       request = await request.json();
       let token = request['detail'];
       this.$store.commit('setToken', token);
+      this.$router.push({name: "Home"});
     }
   }
 }
