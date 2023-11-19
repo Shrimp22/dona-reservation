@@ -1,5 +1,4 @@
 <script>
-import Register from "@/views/Register.vue";
 import {auth} from "@/utils/fetchAPI";
 
 const navItems = [
@@ -52,7 +51,6 @@ export default {
       <router-link to="/reservation">Reservation</router-link>
     </template>
   </div>
-{{isAuth}}
 </template>
 
 <style scoped>
