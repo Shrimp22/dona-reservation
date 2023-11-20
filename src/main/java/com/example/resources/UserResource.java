@@ -2,10 +2,8 @@ package com.example.resources;
 
 
 import com.example.dto.DetailResponse;
-import com.example.dto.Token;
 import com.example.models.User;
 import com.example.service.UserService;
-import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -16,9 +14,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Path("/api/user/")
 @Produces(MediaType.APPLICATION_JSON)

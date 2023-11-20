@@ -1,6 +1,5 @@
 package com.example.dto;
 
-import com.example.models.Product;
 import com.example.models.Reservation;
 
 import java.time.LocalDateTime;

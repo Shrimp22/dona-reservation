@@ -5,13 +5,9 @@ import com.example.models.Product;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 @ApplicationScoped
 public class ProductService implements PanacheRepository<Product> {

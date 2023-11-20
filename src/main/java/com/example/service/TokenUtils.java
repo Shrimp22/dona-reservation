@@ -7,9 +7,7 @@ import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashSet;
 
 public class TokenUtils {
     public static String generateToken(String username, boolean isAdmin) throws Exception {
