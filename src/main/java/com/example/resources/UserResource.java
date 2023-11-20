@@ -2,6 +2,7 @@ package com.example.resources;
 
 
 import com.example.dto.DetailResponse;
+import com.example.dto.Token;
 import com.example.models.User;
 import com.example.service.UserService;
 import io.quarkus.security.Authenticated;
@@ -14,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +82,16 @@ public class UserResource {
             return Response.ok(updateUser).build();
         }
         return Response.status(404).entity(new DetailResponse("User not found")).build();
+    }
+
+    @GET
+    @Path("/token")
+    public Response validateToken() {
+        Principal email = securityContext.getUserPrincipal();
+        if(email == null) {
+            return Response.status(404).entity(new DetailResponse("Token is not valid")).build();
+        }
+        return Response.ok(new DetailResponse("Token is valid")).build();
     }
 
 }

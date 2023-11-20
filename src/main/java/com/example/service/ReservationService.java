@@ -40,10 +40,6 @@ public class ReservationService implements PanacheRepository<Reservation> {
     }
 
     public Response create(Reservation r) {
-        List<Reservation> reservationsInTerm = findByDateTimeRange(r.getStartDate(), r.getEndDate());
-        if(reservationsInTerm.size() > 0) {
-            return Response.status(403).entity(new DetailResponse("Term already taken")).build();
-        }
         String email = securityContext.getUserPrincipal().getName();
         User activeUser = userService.find("email", email).firstResult();
         r.setUser(activeUser);
@@ -52,6 +48,8 @@ public class ReservationService implements PanacheRepository<Reservation> {
             return Response.status(404).build();
         }
         r.setProduct(product);
+        List<Reservation> reservationsInTerm = findByDateTimeRange(r.getStartDate(), r.getEndDate());
+        r.setTerm(reservationsInTerm.size() > 0);
         persist(r);
         UserReservations res = new UserReservations(r);
         return Response.ok(res).build();

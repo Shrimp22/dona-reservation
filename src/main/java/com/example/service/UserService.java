@@ -4,8 +4,6 @@ import com.example.dto.DetailResponse;
 import com.example.dto.UserDto;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.vertx.codegen.doc.Token;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.quarkus.elytron.security.common.BcryptUtil;
 import jakarta.ws.rs.core.Response;
