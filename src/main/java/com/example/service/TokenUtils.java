@@ -28,7 +28,7 @@ public class TokenUtils {
         claimsBuilder.groups(group);
         claimsBuilder.issuedAt(currentTimeInSecs);
         claimsBuilder.expiresAt(currentTimeInSecs + 3600);
-        return claimsBuilder.jws().signatureKeyId(privateKeyLocation).sign(privateKey).trim();
+        return claimsBuilder.jws().keyId(privateKeyLocation).sign(privateKey).trim();
     }
 
 
