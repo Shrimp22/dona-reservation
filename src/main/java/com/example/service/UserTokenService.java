@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.example.dto.DetailResponse;
+import com.example.mailer.MailHandler;
 import com.example.models.User;
 import com.example.models.UserToken;
 
@@ -19,6 +20,8 @@ public class UserTokenService implements PanacheRepository<UserToken>{
     @Inject
     UserService userService;
 
+    @Inject
+    MailHandler mailHandler;
 
     public Response create(String email) {
         User dbUser = userService.find("email", email).firstResult();
@@ -26,7 +29,6 @@ public class UserTokenService implements PanacheRepository<UserToken>{
             return Response.status(404).entity(new DetailResponse("User not found")).build();
         }
         
-        // send email
         UserToken token = new UserToken();
         token.setUser(dbUser);
         LocalDateTime expTime = LocalDateTime.now().plusHours(4);
@@ -37,7 +39,7 @@ public class UserTokenService implements PanacheRepository<UserToken>{
         
 
         persist(token);
-
+        mailHandler.sendEmail(email, "Password reset request", tokenStr);
         return Response.ok(token).build();
 
     }
