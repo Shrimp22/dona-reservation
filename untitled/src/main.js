@@ -11,6 +11,7 @@ import Home from "@/views/Home.vue";
 import Reservation from '@/views/Reservation.vue';
 import {userStore} from "@/utils/store";
 import AboutUs from "@/views/AboutUs.vue";
+import ForgotPassword from '@/views/ForgotPassword.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -19,7 +20,8 @@ const router = createRouter({
         {path: '/login', component: Login, name: "Login"},
         { path: '/reservation', component: Reservation, name: "Reservation" },
         { path: '/', component: Home, name: "Home"},
-        {path: '/aboutus', component: AboutUs, name: "AboutUs"}
+        {path: '/aboutus', component: AboutUs, name: "AboutUs"},
+        {path: '/forgotpassword', component: ForgotPassword, name: "Forgot Password"}
     ]
 });
 

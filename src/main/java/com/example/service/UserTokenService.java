@@ -40,7 +40,7 @@ public class UserTokenService implements PanacheRepository<UserToken>{
 
         persist(token);
         mailHandler.sendEmail(email, "Password reset request", tokenStr);
-        return Response.ok(token).build();
+        return Response.ok(new DetailResponse(token.getToken())).build();
 
     }
 
