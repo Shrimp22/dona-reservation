@@ -5,6 +5,7 @@ import com.example.models.Product;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
 import java.lang.reflect.Field;
@@ -14,37 +15,36 @@ public class ProductService implements PanacheRepository<Product> {
 
     public Product create(Product p, User u) {
         Product dbProduct = find("name", p.getName()).firstResult();
-        // product exist
         if(dbProduct != null) {
-            return null;
+            throw new NotFoundException();
         }
         p.setUser(u);
         persist(p);
         return p;
     }
 
-    public Response getById(Long id) {
+    public Product getById(Long id) {
         Product p = findById(id);
         if(p == null) {
-            return Response.status(404).entity(new DetailResponse("product not found")).build();
+            throw new NotFoundException();
         }
-        return Response.ok(p).build();
+        return p;
     }
 
-    public Response delete(Long id) {
+    public Product delete(Long id) {
         Product dbProduct = findById(id);
         if(dbProduct == null) {
-            return Response.status(404).entity(new DetailResponse("Product not found")).build();
+            throw new NotFoundException();
         }
         delete(dbProduct);
-        return Response.ok(new DetailResponse("Product is deleted")).build();
+        return dbProduct;
     }
 
-    public Response update(Product p) {
+    public Product update(Product p) {
         Product dbProduct = findById(p.getId());
 
         if(dbProduct == null) {
-            return Response.status(404).entity(new DetailResponse("Product not found")).build();
+            throw new NotFoundException();
         }
 
         Field[] fields = Product.class.getDeclaredFields();
@@ -62,7 +62,7 @@ public class ProductService implements PanacheRepository<Product> {
         }
 
         persistAndFlush(dbProduct);
-        return Response.ok(dbProduct).build();
+        return dbProduct;
     }
 
 }

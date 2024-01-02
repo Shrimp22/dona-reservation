@@ -1,6 +1,6 @@
 package com.example.resources;
 
-
+import com.example.dto.DetailResponse;
 import com.example.dto.ProductUserDto;
 import com.example.models.Product;
 import com.example.models.User;
@@ -13,9 +13,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Path("/api/product/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,34 +32,47 @@ public class ProductResource {
     @POST
     @Transactional
     public Response create(Product p) {
-        Map<String, String> response = new HashMap<>();
         String email = securityContext.getUserPrincipal().getName();
         User activeUser = userService.getUserByEmail(email);
-        Product product = productService.create(p, activeUser);
-        if(product == null) {
-            response.put("detail", "Product already exist");
-            return Response.status(400).entity(response).build();
+        try {
+            Product product = productService.create(p, activeUser);
+            return Response.ok(new ProductUserDto(product)).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Product not found")).build();
         }
-
-        return Response.ok(new ProductUserDto(product)).build();
     }
 
 
     @GET
     @Path("{id:\\d+}")
     public Response getById(Long id) {
-        return productService.getById(id);
+        try {
+            Product p = productService.getById(id);
+            return Response.ok(p).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Product not foudn")).build();
+        }
     }
 
     @DELETE
     @Transactional
     public Response delete(Product p) {
-        return productService.delete(p.getId());
+        try {
+            Product product = productService.delete(p.getId());
+            return Response.ok(product).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Product not foudn")).build();
+        }
     }
 
     @PUT
     @Transactional
     public Response update(Product p) {
-        return productService.update(p);
+        try {
+            Product product = productService.update(p);
+            return Response.ok(product).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Product not foudn")).build();
+        }
     }
 }

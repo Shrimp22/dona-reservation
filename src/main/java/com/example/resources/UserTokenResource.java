@@ -1,16 +1,15 @@
 package com.example.resources;
 
+import com.example.dto.DetailResponse;
+import com.example.exeptions.ReservationExpiredExeption;
+import com.example.models.UserToken;
 import com.example.models.request.ChangePasswordRequest;
 import com.example.models.request.UserTokenRequest;
 import com.example.service.UserTokenService;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.PATCH;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -25,7 +24,8 @@ public class UserTokenResource {
     @POST
     @Transactional
     public Response create(UserTokenRequest token) {
-        return userTokenService.create(token.getEmail());
+        UserToken userToken = userTokenService.create(token.getEmail());
+        return Response.ok(userToken).build();
     }
 
 
@@ -33,6 +33,13 @@ public class UserTokenResource {
     @Transactional
     @Path("/{token}")
     public Response changePassword(String token, ChangePasswordRequest request) {
-        return userTokenService.changePassword(token, request.getPassword());
+        try {
+            UserToken userToken = userTokenService.changePassword(token, request.getPassword());
+            return Response.ok(userToken).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Token not found")).build();
+        } catch (ReservationExpiredExeption e) {
+            return Response.status(403).entity(new DetailResponse("Token Expired exeption")).build();
+        }
     }
 }

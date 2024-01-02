@@ -2,11 +2,14 @@ package com.example.resources;
 
 
 import com.example.dto.DetailResponse;
+import com.example.dto.UserDto;
+import com.example.exeptions.WrongPasswordExeption;
 import com.example.models.User;
 import com.example.service.UserService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityExistsException;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -29,7 +32,12 @@ public class UserResource {
     @PermitAll
     @Transactional
     public Response addUser(User u) {
-        return userService.create(u);
+        try {
+            User user = userService.create(u);
+            return Response.ok(new UserDto(user)).build();
+        } catch (EntityExistsException e) {
+            return Response.status(409).entity(new DetailResponse("User already exist")).build();
+        }
     }
 
     @GET
@@ -42,7 +50,14 @@ public class UserResource {
     @PermitAll
     @Path("/login")
     public Response loginUser(User u) {
-        return userService.login(u);
+        try {
+            String token = userService.login(u);
+            return Response.ok(new DetailResponse(token)).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("User not found")).build();
+        } catch (WrongPasswordExeption e) {
+            return Response.status(404).entity(new DetailResponse("Wrong password")).build();
+        }
     }
 
 
@@ -50,33 +65,36 @@ public class UserResource {
     @RolesAllowed("Admin")
     @Transactional
     public Response deleteUser(User u) {
-        User deletedUser = userService.delete(u.getId());
-        if(deletedUser != null) {
+        try {
+            User deletedUser = userService.delete(u.getId());
             return Response.ok(deletedUser).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("User not found")).build();
         }
-        return Response.status(404).entity(new DetailResponse("User not found")).build();
     }
 
     @RolesAllowed("Admin")
     @GET
     @Path("/{id:\\d+}")
     public Response getId(Long id) {
-        User findUser = userService.getById(id);
-        if(findUser != null) {
+        try {
+            User findUser = userService.getById(id);
             return Response.ok(findUser).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("User not found")).build();
         }
-        return Response.status(404).entity(new DetailResponse("User not found")).build();
     }
 
     @RolesAllowed("User")
     @PUT
     @Transactional
     public Response updateUser(User u) {
-        User updateUser = userService.update(u);
-        if(updateUser != null) {
+        try {
+            User updateUser = userService.update(u);
             return Response.ok(updateUser).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("User not found")).build();
         }
-        return Response.status(404).entity(new DetailResponse("User not found")).build();
     }
 
     @GET

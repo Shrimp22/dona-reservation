@@ -2,12 +2,14 @@ package com.example.service;
 
 import com.example.dto.DetailResponse;
 import com.example.dto.UserReservations;
+import com.example.exeptions.ProductNotFoundExeption;
 import com.example.models.Product;
 import com.example.models.Reservation;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -31,7 +33,6 @@ public class ReservationService implements PanacheRepository<Reservation> {
     @Inject
     ProductService productService;
 
-    // check is term taken and mark it with boolean
 
     public List<Reservation> findByDateTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
         return find("startDate between ?1 and ?2 or endDate between ?1 and ?2 or (startDate <= ?1 and endDate >= ?2)",
@@ -39,61 +40,57 @@ public class ReservationService implements PanacheRepository<Reservation> {
                 .list();
     }
 
-    public Response create(Reservation r) {
+    public UserReservations create(Reservation r) {
         String email = securityContext.getUserPrincipal().getName();
         User activeUser = userService.find("email", email).firstResult();
         r.setUser(activeUser);
         Product product = productService.findById(r.getProductId());
         if(product == null) {
-            return Response.status(404).build();
+            throw new NotFoundException();
         }
         r.setProduct(product);
         List<Reservation> reservationsInTerm = findByDateTimeRange(r.getStartDate(), r.getEndDate());
-        r.setTerm(reservationsInTerm.size() > 0);
+        r.setTerm(reservationsInTerm.isEmpty());
         persist(r);
         UserReservations res = new UserReservations(r);
-        return Response.ok(res).build();
+        return res;
     }
 
 
-    public Response delete(Long id) {
+    public Reservation delete(Long id) {
         Reservation dbRes = findById(id);
         if(dbRes == null) {
-            Map<String, String> resp = new HashMap<>();
-            resp.put("detail", "Reservation not found");
-            return Response.status(404).entity(resp).build();
+            throw new NotFoundException();
         }
         dbRes.setProduct(null);
         dbRes.setUser(null);
         delete(dbRes);
-        return Response.ok(dbRes).build();
+        return dbRes;
     }
 
-    public Response getById(Long id) {
+    public Reservation getById(Long id) {
         Reservation dbRes = findById(id);
         if(dbRes == null) {
-            return Response.status(404).build();
+            throw new NotFoundException();
         }
-        return Response.ok(dbRes).build();
+        return dbRes;
     }
 
-    public Response getReservationsFromUser(Long id) {
+    public Set<UserReservations> getReservationsFromUser(Long id) {
         User dbUser = userService.getById(id);
         if(dbUser == null) {
-            return Response.status(404).build();
+            throw new NotFoundException();
         }
-
         Set<Reservation> userRes = dbUser.getReservations();
         Set<UserReservations> res = userRes.stream().map(UserReservations::new).collect(Collectors.toSet());
-        return Response.ok(res).build();
-
+        return res;
     }
 
 
-    public Response update(Reservation r) {
+    public Reservation update(Reservation r) throws ProductNotFoundExeption {
         Reservation dbRes = findById(r.getId());
         if(dbRes == null) {
-            return Response.status(404).entity(new DetailResponse("Reservation not found")).build();
+            throw new NotFoundException();
         }
         Field[] fields = Reservation.class.getDeclaredFields();
 
@@ -107,7 +104,7 @@ public class ReservationService implements PanacheRepository<Reservation> {
                     if(fieldName.equalsIgnoreCase("productId")) {
                         Product dbProduct = productService.findById((Long) value);
                         if(dbProduct == null) {
-                            return Response.status(404).entity(new DetailResponse("Product not found")).build();
+                            throw new ProductNotFoundExeption();
                         }
                         dbRes.setProduct(dbProduct);
                     }
@@ -122,7 +119,7 @@ public class ReservationService implements PanacheRepository<Reservation> {
         dbRes.deny();
         persistAndFlush(dbRes);
 
-        return Response.ok(new UserReservations(dbRes)).build();
+        return dbRes;
     }
 
 }

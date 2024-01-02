@@ -2,10 +2,13 @@ package com.example.service;
 
 import com.example.dto.DetailResponse;
 import com.example.dto.UserDto;
+import com.example.exeptions.WrongPasswordExeption;
 import com.example.models.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.quarkus.elytron.security.common.BcryptUtil;
+import jakarta.persistence.EntityExistsException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
 
@@ -16,16 +19,15 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UserService implements PanacheRepository<User> {
-    public Response create(User u) {
+    public User create(User u) {
         User findUser = find("email", u.getEmail()).firstResult();
         if(findUser != null) {
-            return Response.status(403).entity(new DetailResponse("User already exist")).build();
+            throw new EntityExistsException();
         }
-
         String hashedPassword = BcryptUtil.bcryptHash(u.getPassword());
         u.setPassword(hashedPassword);
         persist(u);
-        return Response.ok(new UserDto(u)).build();
+        return u;
     }
 
     public Response getAll() {
@@ -34,25 +36,30 @@ public class UserService implements PanacheRepository<User> {
         return Response.ok(usersDto).build();
     }
 
-    public Response login(User u) {
+    public String login(User u) throws WrongPasswordExeption{
         User dbUser = find("email", u.getEmail()).firstResult();
         if(dbUser == null) {
-            return Response.status(404).entity(new DetailResponse("User not found")).build();
+            throw new NotFoundException();
         }
+
         if(BcryptUtil.matches(u.getPassword(), dbUser.getPassword())) {
             try {
                 String token = TokenUtils.generateToken(dbUser.getEmail(), dbUser.isAdmin());
-                return Response.ok(new DetailResponse("Bearer " + token)).build();
+                return "Bearer " + token;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }else {
+            throw new WrongPasswordExeption();
         }
-        return Response.status(401).entity(new DetailResponse("Wrong password")).build();
 
     }
 
     public User getUserByEmail(String email) {
         User u = find("email", email).firstResult();
+        if(u == null) {
+            throw new NotFoundException();
+        }
         return u;
     }
 
@@ -60,7 +67,7 @@ public class UserService implements PanacheRepository<User> {
     public User delete(Long id) {
         User dbUser = findById(id);
         if(dbUser == null) {
-            return null;
+            throw new NotFoundException();
         }
         delete(dbUser);
         return dbUser;
@@ -69,7 +76,7 @@ public class UserService implements PanacheRepository<User> {
     public User getById(Long id) {
         User dbUser = findById(id);
         if(dbUser == null) {
-            return null;
+            throw new NotFoundException();
         }
         return dbUser;
     }
@@ -77,7 +84,7 @@ public class UserService implements PanacheRepository<User> {
     public User update(User u) {
         User dbUser = findById(u.getId());
         if(dbUser == null) {
-            return  null;
+            throw new NotFoundException();
         }
 
         Field[] fields = User.class.getDeclaredFields();

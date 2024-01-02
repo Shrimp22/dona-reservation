@@ -1,13 +1,19 @@
 package com.example.resources;
 
+import com.example.dto.DetailResponse;
+import com.example.dto.UserReservations;
+import com.example.exeptions.ProductNotFoundExeption;
 import com.example.models.Reservation;
 import com.example.service.ReservationService;
+import io.quarkus.qute.Results;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.Set;
 
 @Path("/api/reservation/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,21 +27,38 @@ public class ReservationResource {
     @POST
     @Transactional
     public Response create(Reservation r) {
-        return reservationService.create(r);
+        try {
+            UserReservations reservation = reservationService.create(r);
+            return Response.ok(reservation).build();
+        }catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Product not found")).build();
+        }
     }
 
     @RolesAllowed("User")
     @DELETE
     @Transactional
     public Response delete(Reservation r) {
-        return reservationService.delete(r.getId());
+        try {
+            Reservation reservation = reservationService.delete(r.getId());
+            return Response.ok(reservation).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Reservation not found")).build();
+
+        }
+
     }
 
     @RolesAllowed("User")
     @GET
     @Path("/{id:\\d+}")
     public Response getById(Long id) {
-        return reservationService.getById(id);
+        try {
+            Reservation reservation = reservationService.getById(id);
+            return Response.ok(reservation).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Reservation not found")).build();
+        }
     }
 
 
@@ -43,13 +66,24 @@ public class ReservationResource {
     @GET
     @Path("/user/{id:\\d+}")
     public Response getFromUser(Long id) {
-        return reservationService.getReservationsFromUser(id);
-    }
-
+        try {
+            Set<UserReservations> userReservations = reservationService.getReservationsFromUser(id);
+            return Response.ok(userReservations).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity("User not found").build();
+        }
+}
     @RolesAllowed("User")
     @PUT
     @Transactional
     public Response update(Reservation r) {
-        return reservationService.update(r);
+        try {
+            Reservation reservation = reservationService.update(r);
+            return Response.ok(reservation).build();
+        } catch (NotFoundException e) {
+            return Response.status(404).entity(new DetailResponse("Reservation not found")).build();
+        } catch (ProductNotFoundExeption e) {
+            return Response.status(404).entity(new DetailResponse("Product not found")).build();
+        }
     }
 }
