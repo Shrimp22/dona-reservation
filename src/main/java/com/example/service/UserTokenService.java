@@ -11,11 +11,14 @@ import com.example.models.UserToken;
 
 import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.vertx.ext.web.handler.HttpException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+
+import javax.management.InstanceAlreadyExistsException;
 
 @ApplicationScoped
 public class UserTokenService implements PanacheRepository<UserToken>{
@@ -26,18 +29,27 @@ public class UserTokenService implements PanacheRepository<UserToken>{
     @Inject
     MailHandler mailHandler;
 
-    public UserToken create(String email) {
+    public UserToken create(String email)  {
         User dbUser = userService.find("email", email).firstResult();
         if(dbUser == null) {
             throw new NotFoundException("User not found");
         }
-        
+
+        UserToken userToken = find("user", dbUser).firstResult();
+        if(userToken != null) {
+            throw new HttpException(403);
+        }
+
         UserToken token = new UserToken();
         token.setUser(dbUser);
         LocalDateTime expTime = LocalDateTime.now().plusHours(4);
         token.setExprTime(expTime);
         
         String tokenStr = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+        UserToken dbToken = find("token", tokenStr).firstResult();
+        if(dbToken != null) {
+            throw new HttpException(403);
+        }
         token.setToken(tokenStr);
         
 
@@ -50,7 +62,7 @@ public class UserTokenService implements PanacheRepository<UserToken>{
         UserToken dbToken = find("token", token).firstResult();
         LocalDateTime now = LocalDateTime.now();
         if(dbToken == null) {
-            throw new NotFoundException();
+            throw new ReservationExpiredExeption();
         }else if(dbToken.getExprTime().isBefore(now)) {
             delete(dbToken);
             throw new ReservationExpiredExeption();
