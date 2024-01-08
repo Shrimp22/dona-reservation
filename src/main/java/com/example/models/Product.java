@@ -9,8 +9,8 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private float price;
-    private float duration;
+    private Float price;
+    private Float duration;
 
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = User.class)
     @JoinColumn(name="user_id", nullable = false)

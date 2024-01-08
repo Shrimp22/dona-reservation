@@ -12,9 +12,9 @@ public class Reservation {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private boolean approved = false;
+    private Boolean approved = false;
 
-    private boolean termTaken = false;
+    private Boolean termTaken = false;
 
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = Product.class)
     @JoinColumn(name="product_id", nullable = false)

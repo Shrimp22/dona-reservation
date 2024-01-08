@@ -17,7 +17,7 @@ public class User {
     private String email;
     private String password;
 
-    private boolean isAdmin = false;
+    private Boolean isAdmin = false;
 
     // created products
     @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
